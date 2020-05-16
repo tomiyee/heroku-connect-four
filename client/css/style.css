@@ -1,0 +1,24 @@
+.connect-four-square {
+  display: block;
+  border-radius: 50%;
+  background: lightblue;
+}
+
+.connect-four:hover {
+  cursor: pointer;
+}
+
+.connect-four tr {
+  margin:0;
+  padding:0;
+}
+
+.connect-four td {
+  background: blue;
+  margin:0;
+  padding:0;
+}
+
+.top-row td{
+  background:white;
+}
