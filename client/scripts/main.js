@@ -71,12 +71,10 @@ class ConnectFourBoard extends React.Component {
 
     return (
       <center>
-        <div class="connect-four">
-          <table cellspacing={0}>
-            {topRow}
-            {rows}
-          </table>
-        </div>
+        <table class="connect-four" cellspacing={0}>
+          {topRow}
+          {rows}
+        </table>
       </center>
     );
   }
