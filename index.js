@@ -28,7 +28,8 @@ server.listen(PORT, process.env.IP || "0.0.0.0", function () {
 /* ============================ EVENT HANDLERS ============================ */
 
 io.on('connection', function(socket){
-  console.log("Connection!")
+  console.log("Connection!");
+  io.emit("message", "You've successfully connected!");
 
   // To add an event listener
   // socket.on(event, (data) => {});
