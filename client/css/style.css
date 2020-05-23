@@ -4,6 +4,11 @@
   background: lightblue;
 }
 
+.connect-four {
+  border-radius:5px;
+  overflow:hidden;
+}
+
 .connect-four:hover {
   cursor: pointer;
 }
@@ -21,4 +26,12 @@
 
 .top-row td{
   background:white;
+}
+
+.red {
+  background:red;
+}
+
+.yellow {
+  background:yellow;
 }
