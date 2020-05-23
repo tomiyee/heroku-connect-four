@@ -3,7 +3,7 @@ const EMPTY   = null;
 const RED     = "red";
 const YELLOW  = "yellow";
 const TEMP_R  = "temp-red";
-const TEMP_Y  = "temp-yelow";
+const TEMP_Y  = "temp-yellow";
 
 const SLOT_WIDTH = 50;
 // Game Variables
@@ -51,12 +51,17 @@ socket.on("rooms-data", (data) => {
     const tr = $(document.createElement('tr'));
     const roomName = $(document.createElement('td'));
   }
+});
 
-
+// Event called whenever the opponent clicked on the grid
+socket.on("opponent-clicked", (squareR, squareC) => {
 
 });
 
+// Event called whenever the opponent moved their mouse accross the grid
+socket.on("opponent-mouse-moved", (squareR, squareC) => {
 
+});
 
 /* =========================== CLASS DEFINITIONS =========================== */
 
@@ -149,8 +154,12 @@ class ConnectFourBoard extends React.Component {
     return -1;
   }
 
-
-
+  /**
+   * clickHandler - Handles whenever the mouse clicks on a square.
+   *
+   * @param  {number} squareR The row of the square that got clicked on
+   * @param  {number} squareC The column of the square that got clicked on
+   */
   clickHandler (squareR, squareC) {
     console.log(`Clicked: ${squareR}, ${squareC}`);
 
@@ -172,6 +181,12 @@ class ConnectFourBoard extends React.Component {
     });
   }
 
+  /**
+   * mouseMoveHandler - Handles whenever the mouse moves accross the board
+   *
+   * @param  {number} squareRow The row of the square that the mouse is on
+   * @param  {number} squareCol The col of the square that the mouse is on
+   */
   mouseMoveHandler (squareRow, squareCol) {
     // Ignore the event if the col has remained unchanged
     if (this.state.mouseCol == squareCol) return;
@@ -183,14 +198,17 @@ class ConnectFourBoard extends React.Component {
     // Make a copy of the current grid
     const grid = this.state.grid.slice();
     // Mutate the copy of the current grid
+    if (this.state.mouseCol != -1) {
+      const prevCol = this.state.mouseCol;
+      const prevRow = this.getFirstEmpty(prevCol);
+      grid[prevRow*this.state.cols+prevCol] = EMPTY;
+    }
     grid[r*this.state.cols+c] = this.state.redTurn ? TEMP_R : TEMP_Y;
     // Update the mouseCol to the new Column
     this.setState({
       "grid": grid,
       "mouseCol": squareCol
     });
-
-    console.log(squareCol);
   }
 
 
