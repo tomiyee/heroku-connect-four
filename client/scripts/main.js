@@ -14,25 +14,17 @@ let currentPlayer = RED;
 const socket = io();
 
 let root;
+let rooms;
 let game;
 
 $(start);
 
 function start () {
-  // Saves the global instances of React objects
-  root = document.getElementById('root');
-  game = <ConnectFourBoard />;
   // Renders the React Objects
-  ReactDOM.render(game, root);
-  // Temp
-  let roomName = "temporary name";
-  let tr = <tr>
-    <td class="room-name"> {roomName} </td>
-    <td>3</td>
-  </tr>;
-
-
+  rooms = ReactDOM.render(<Rooms />, document.getElementById('rooms-root'));
+  game = ReactDOM.render( <ConnectFourBoard />, document.getElementById('root'));
 }
+
 
 /* ========================= SERVER EVENT HANDLERS ========================= */
 
@@ -41,16 +33,9 @@ socket.on("message", (data) => {
 });
 
 socket.on("rooms-data", (data) => {
-  // data is a list of objects with relevant room data
-  const table = $(document.createElement('table'));
   // sorts the rooms in order of oldest to newest
   const sorted = data.sort((a,b) => a.creationTime - b.creationTime);
-
-  for (let i in sorted) {
-    let roomData = sorted[i];
-    const tr = $(document.createElement('tr'));
-    const roomName = $(document.createElement('td'));
-  }
+  rooms.setState({"rooms": sorted});
 });
 
 // Event called whenever the opponent clicked on the grid
@@ -64,6 +49,30 @@ socket.on("opponent-mouse-moved", (squareR, squareC) => {
 });
 
 /* =========================== CLASS DEFINITIONS =========================== */
+
+
+class Rooms extends React.Component {
+
+  constructor (props) {
+    super(props);
+    // Using the ref attribute, I can call methods of the Rooms class
+    this._child = React.createRef();
+    // The initial state
+    this.state = {
+      rooms: []
+    };
+  }
+
+  render () {
+    return (
+      <table>
+      {this.state.rooms.map((room) => {
+        return <tr><td>{room.name}</td><td>1/2</td></tr>
+      })}
+      </table>
+    );
+  }
+}
 
 
 class ConnectFourSquare extends React.Component {
