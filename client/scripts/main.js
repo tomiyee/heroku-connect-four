@@ -26,6 +26,83 @@ function start () {
 }
 
 
+function calculateWinner(squares, rows=6, cols=7, len=4) {
+
+  // horizontal lines
+  for (let r = 0; r < rows; r++) {
+    for (let offset = 0; offset < cols-len+1; offset++){
+      // Condition 1, the first square must not be empty
+      if (squares[r*cols+offset] == null)
+        continue;
+      // Condition 2, the rest of the squares must match
+      let match = true;
+      for (let c = 0; c < len-1; c++) {
+        if (squares[r*cols+offset + c] !== squares[r*cols+offset + c+1]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) return squares[r*cols+offset];
+    }
+  }
+
+  // vertical lines
+  for (let c = 0; c < cols; c++) {
+    for (let offset = 0; offset < rows-len+1; offset++){
+      // Condition 1, the first square must not be empty
+      if (squares[offset*cols+c] == null)
+        continue;
+      // Condition 2, the rest of the squares must match
+      let match = true;
+      for (let r = 0; r < len-1; r++) {
+        if (squares[(r+offset)*cols + c] !== squares[(r+offset+1)*cols + c]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) return squares[offset*cols+c];
+    }
+  }
+
+  // Down-Right Diagonal Lines
+  for (let c = 0; c < cols-len+1; c++) {
+    for (let r = 0; r < rows-len+1; r++) {
+      // Condition 1, the first square must not be empty
+      if (squares[r*cols + c] == null)
+        continue;
+      // Condition 2, the rest of the squares must match
+      let match = true;
+      for (let offset = 0; offset < len-1; offset++) {
+        if(squares[(r+offset)*cols+(c+offset)] !== squares[(r+offset+1)*cols+(c+offset+1)]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) return squares[r*cols + c];
+    }
+  }
+
+  // Up-Right Diagonal Lines
+  for (let r = len-1; r < rows; r++) {
+    for (let c = 0; c < cols-len+1; c++) {
+      // Condition 1, the first square must not be empty
+      if (squares[r*cols + c] == null)
+        continue;
+      // Condition 2, the rest of the squares must match
+      let match = true;
+      for (let offset = 0; offset < len-1; offset++) {
+        if(squares[(r-offset)*cols+(c+offset)] !== squares[(r-offset-1)*cols+(c+offset+1)]) {
+          match = false;
+          break;
+        }
+      }
+      if (match) return squares[r*cols + c];
+    }
+  }
+
+  return null;
+}
+
 /* ========================= SERVER EVENT HANDLERS ========================= */
 
 socket.on("message", (data) => {
