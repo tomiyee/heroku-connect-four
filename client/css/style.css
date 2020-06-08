@@ -1,3 +1,12 @@
+:root {
+  --color-1: #04080F;
+  --color-2: #373F51;
+  --color-3: #8EA8C3;
+  --color-4: #8AC4FF;
+  --color-4-darker: #70B8FF;
+  --color-5: #507DBC;
+}
+
 .connect-four-square {
   display: block;
   border-radius: 50%;
@@ -42,4 +51,67 @@
 
 .temp-yellow {
   background:orange;
+}
+
+/* ========================== Room Data Containers ========================== */
+
+/* Define the room container */
+.rooms-container {
+  width: 600px;
+  height: 400px;
+  background: var(--color-5);
+  position: relative;
+}
+
+.rooms-list tr :nth-child(odd) {
+  width: 500px;
+}
+
+.rooms-list tr :nth-child(even) {
+  width: 100px;
+  text-align: center;
+}
+
+.create-room {
+  position:relative;
+  font-size:20px;
+}
+.create-room-input {
+  font-size: inherit;
+  width:420px
+}
+.create-room-button {
+  position: relative;
+  right:0;
+  font-size: inherit;
+  width:170px;
+}
+
+.rooms-list-container {
+  overflow-y: scroll;
+  height: 100%;
+}
+
+/* Alternating the colors of the rows of the room display */
+.rooms-list tr:nth-child(odd) {
+  background: var(--color-4);
+}
+.rooms-list tr:nth-child(even) {
+  background: var(--color-4-darker);
+}
+
+.rooms-list tr:nth-child(1) {
+  background: var(--color-2);
+  color: white;
+  padding: 15px;
+}
+
+.rooms-list th {
+  font-size: 24px;
+  padding:5px;
+}
+
+.rooms-list td {
+  font-size: 24px;
+  padding:5px;
 }

@@ -25,7 +25,7 @@ server.listen(PORT, process.env.IP || "0.0.0.0", function () {
   console.log("Server listening at", addr.address + ":" + addr.port);
 });
 
-/* ============================ ROOM VARS ============================ */
+/* =============================== ROOM VARS =============================== */
 
 const rooms = [];
 
@@ -33,6 +33,7 @@ class Room {
   constructor (name) {
     this.players = [];
     this.creationTime = Date.now();
+    this.name = name;
   }
 
   join (socket) {
@@ -45,7 +46,7 @@ class Room {
   /**
    * has - Returns true if the socket has the current room
    *
-   * @param  {Socket} socket the scoket to check
+   * @param  {Socket} socket the socket to check
    * @return {boolean}       true if the scoket is in the room's list of players
    */
   has (socket) {
@@ -79,31 +80,32 @@ class Room {
 /* ============================ EVENT HANDLERS ============================ */
 
 io.on('connection', function(socket){
-  console.log("Connection!");
-  io.emit("message", "You've successfully connected!");
-  // Immediately send
+  // Notify the server that a new user has connected
+  // console.log("Connection!");
+  // Tell the user that they have successfully connected to the server
+  // socket.emit("message", "You've successfully connected!");
+
+  // Immediately send this socket the room data
   emitRoomData(socket);
 
-  /**
-   * Create Room Handler
-   *
-   * Creates a new room and automatically has the socket join
-   */
   socket.on("create-room", (data) => {
     if (!('name' in data))
       return socket.emit("message", "Missing room name");
     const room = new Room(data.name);
     room.join(socket);
-
+    rooms.push(room)
+    // Send to all sockets the updated list
+    emitRoomData();
   });
-
 
   socket.on('join-room',  (data) => {
     for (let i in rooms) {
       if (rooms[i].name != data.name)
         continue;
       rooms[i].join(socket);
+      // Send to all sockets the updated list
       emitRoomData();
+      break;
     }
   })
 
@@ -125,17 +127,10 @@ io.on('connection', function(socket){
 });
 
 function emitRoomData (socket) {
+  const waitingRooms = rooms.filter((room) => room.players.length < 2);
+  console.log(waitingRooms);
   if (!socket)
-    return io.emit("rooms-data", rooms.map((room) => room.toObject()));
-  socket.emit("rooms-data", rooms.map((room) => room.toObject()));
+    return io.emit("rooms-data", waitingRooms.map((room) => room.toObject()));
+  // Filters out all full rooms before sending the data to everyone
+  socket.emit("rooms-data", waitingRooms.map((room) => room.toObject()));
 }
-
-
-
-
-
-// setInterval(() => console.log(rooms), 5000);
-
-
-// To send a signal to all sockets
-// io.sockets.emit(event, data);

@@ -21,8 +21,9 @@ $(start);
 
 function start () {
   // Renders the React Objects
-  rooms = ReactDOM.render(<Rooms />, document.getElementById('rooms-root'));
+  rooms = ReactDOM.render(<Rooms />, document.getElementById('room-root'));
   game = ReactDOM.render( <ConnectFourBoard />, document.getElementById('root'));
+  $('#root').hide();
 }
 
 
@@ -103,6 +104,27 @@ function calculateWinner(squares, rows=6, cols=7, len=4) {
   return null;
 }
 
+
+function createRoom () {
+  // Fetch the value of and empty the room name input
+  const roomName = $('.create-room-input').val();
+  if (roomName.length == 0) return;
+  $('.create-room-input').val('');
+
+  // If the name isn't empty, send a create room request
+  socket.emit('create-room', {'name': roomName});
+  $('#room-root').hide();
+  $('#root').show();
+}
+
+function joinRoom (roomName) {
+  socket.emit('join-room', {'name': roomName});
+  $('#room-root').hide();
+  $('#root').show();
+  game.setState({hasOpponent:true});
+
+}
+
 /* ========================= SERVER EVENT HANDLERS ========================= */
 
 socket.on("message", (data) => {
@@ -110,10 +132,16 @@ socket.on("message", (data) => {
 });
 
 socket.on("rooms-data", (data) => {
+  console.log("Room Data has been received");
   // sorts the rooms in order of oldest to newest
   const sorted = data.sort((a,b) => a.creationTime - b.creationTime);
-  rooms.setState({"rooms": sorted});
+  if (rooms)
+    rooms.setState({"rooms": sorted});
 });
+
+socket.on('opponent-joined', () => {
+  game.setState({hasOpponent:true});
+})
 
 // Event called whenever the opponent clicked on the grid
 socket.on("opponent-clicked", (squareR, squareC) => {
@@ -127,6 +155,27 @@ socket.on("opponent-mouse-moved", (squareR, squareC) => {
 
 /* =========================== CLASS DEFINITIONS =========================== */
 
+class CreateRoom extends React.Component {
+  constructor (props) {
+    super(props);
+  }
+
+  keyDownHandler (e, i) {
+    // Only respond to ENTER
+    if (e.keyCode != 13)
+      return;
+    createRoom();
+  }
+
+  render () {
+    return (
+      <div class='create-room'>
+        <input class='create-room-input' onKeyDown={(e) => this.keyDownHandler(e, this)}/>
+        <button class='create-room-button' onClick={createRoom}>Create a Room</button>
+      </div>
+    );
+  }
+}
 
 class Rooms extends React.Component {
 
@@ -142,11 +191,28 @@ class Rooms extends React.Component {
 
   render () {
     return (
-      <table>
-      {this.state.rooms.map((room) => {
-        return <tr><td>{room.name}</td><td>1/2</td></tr>
-      })}
-      </table>
+      <center>
+        <div class='rooms-container'>
+          <div class='rooms-list-container'>
+            <table class='rooms-list'>
+              <tr>
+                <th>Existing Rooms</th>
+                <th>Players</th>
+              </tr>
+              {this.state.rooms.map((room) => (
+                <tr
+                  class='room-data'
+                  onClick={() => joinRoom(room.name)}
+                >
+                  <td>{room.name}</td>
+                  <td>1/2</td>
+                </tr>)
+              )}
+            </table>
+          </div>
+          <CreateRoom />
+        </div>
+      </center>
     );
   }
 }
@@ -198,6 +264,7 @@ class ConnectFourBoard extends React.Component {
     const c = this.props.cols || 7;
 
     this.state = {
+      hasOpponent: false,
       rows: r,
       cols: c,
       grid: new Array(r*c).fill(EMPTY),
