@@ -29,13 +29,32 @@ server.listen(PORT, process.env.IP || "0.0.0.0", function () {
 
 const rooms = [];
 
+/**
+ * class Room - description
+ *
+ * @param  {type} name description
+ * @return {type}      description
+ */
 class Room {
+
+  /**
+   * constructor - description  
+   *
+   * @param  {type} name description
+   * @return {type}      description
+   */
   constructor (name) {
     this.players = [];
     this.creationTime = Date.now();
     this.name = name;
   }
 
+  /**
+   * join - description
+   *
+   * @param  {type} socket description
+   * @return {type}        description
+   */
   join (socket) {
     if (this.players.length >= 2)
       return console.error("The room has enough players already");
@@ -69,6 +88,11 @@ class Room {
     return this.players.length == 0;
   }
 
+  /**
+   * toObject - description
+   *
+   * @return {type}  description
+   */
   toObject () {
     return {
       name: this.name,
@@ -88,6 +112,12 @@ io.on('connection', function(socket){
   // Immediately send this socket the room data
   emitRoomData(socket);
 
+  /**
+   * data - description
+   *
+   * @param  {type} let i in rooms description
+   * @return {type}                description
+   */
   socket.on("create-room", (data) => {
     if (!('name' in data))
       return socket.emit("message", "Missing room name");
@@ -98,6 +128,12 @@ io.on('connection', function(socket){
     emitRoomData();
   });
 
+  /**
+   * data - description
+   *
+   * @param  {type} let i in rooms description
+   * @return {type}                description
+   */
   socket.on('join-room',  (data) => {
     for (let i in rooms) {
       if (rooms[i].name != data.name)
@@ -109,9 +145,12 @@ io.on('connection', function(socket){
     }
   })
 
-
-  // To add an event listener
-  // socket.on(event, (data) => {});
+  /**
+   * for - description
+   *
+   * @param  {type} let i in rooms description
+   * @return {type}                description
+   */
   socket.on('disconnect', () => {
     for (let i in rooms) {
       let room = rooms[i];
@@ -126,6 +165,12 @@ io.on('connection', function(socket){
   });
 });
 
+/**
+ * emitRoomData - description
+ *
+ * @param  {type} socket description
+ * @return {type}        description
+ */
 function emitRoomData (socket) {
   const waitingRooms = rooms.filter((room) => room.players.length < 2);
   console.log(waitingRooms);

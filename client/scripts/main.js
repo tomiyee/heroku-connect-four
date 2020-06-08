@@ -19,6 +19,11 @@ let game;
 
 $(start);
 
+/**
+ * start - description
+ *
+ * @return {type}  description
+ */
 function start () {
   // Renders the React Objects
   rooms = ReactDOM.render(<Rooms />, document.getElementById('room-root'));
@@ -26,7 +31,15 @@ function start () {
   $('#root').hide();
 }
 
-
+/**
+ * calculateWinner - description
+ *
+ * @param  {type} squares description
+ * @param  {type} rows=6  description
+ * @param  {type} cols=7  description
+ * @param  {type} len=4   description
+ * @return {type}         description
+ */
 function calculateWinner(squares, rows=6, cols=7, len=4) {
 
   // horizontal lines
@@ -104,7 +117,11 @@ function calculateWinner(squares, rows=6, cols=7, len=4) {
   return null;
 }
 
-
+/**
+ * createRoom - description
+ *
+ * @return {type}  description
+ */
 function createRoom () {
   // Fetch the value of and empty the room name input
   const roomName = $('.create-room-input').val();
@@ -117,6 +134,12 @@ function createRoom () {
   $('#root').show();
 }
 
+/**
+ * joinRoom - description
+ *
+ * @param  {type} roomName description
+ * @return {type}          description
+ */
 function joinRoom (roomName) {
   socket.emit('join-room', {'name': roomName});
   $('#room-root').hide();
@@ -155,6 +178,12 @@ socket.on("opponent-mouse-moved", (squareR, squareC) => {
 
 /* =========================== CLASS DEFINITIONS =========================== */
 
+/**
+ * class CreateRoom - description
+ *
+ * @param  {type} props description
+ * @return {type}       description
+ */
 class CreateRoom extends React.Component {
   constructor (props) {
     super(props);
@@ -177,6 +206,12 @@ class CreateRoom extends React.Component {
   }
 }
 
+/**
+ * class Rooms - description
+ *
+ * @param  {type} props description
+ * @return {type}       description
+ */
 class Rooms extends React.Component {
 
   constructor (props) {
@@ -217,7 +252,12 @@ class Rooms extends React.Component {
   }
 }
 
-
+/**
+ * class ConnectFourSquare - description
+ *
+ * @param  {type} props description
+ * @return {type}       description
+ */
 class ConnectFourSquare extends React.Component {
   constructor (props) {
     super(props);
@@ -255,7 +295,12 @@ class ConnectFourSquare extends React.Component {
   }
 }
 
-
+/**
+ * class ConnectFourBoard - description
+ *
+ * @param  {type} props description
+ * @return {type}       description
+ */
 class ConnectFourBoard extends React.Component {
   constructor (props) {
     super(props);
