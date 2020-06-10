@@ -96,14 +96,20 @@
 .rooms-list tr:nth-child(odd) {
   background: var(--color-4);
 }
+
 .rooms-list tr:nth-child(even) {
   background: var(--color-4-darker);
+}
+
+.rooms-list tr {
+  cursor:pointer;
 }
 
 .rooms-list tr:nth-child(1) {
   background: var(--color-2);
   color: white;
   padding: 15px;
+  cursor:default;
 }
 
 .rooms-list th {
