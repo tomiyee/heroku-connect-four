@@ -8,7 +8,7 @@ const TEMP_Y  = "temp-yellow";
 const SLOT_WIDTH = 50;
 // Game Variables
 let currentTurn = RED;
-let currentPlayer = RED;
+let currentPlayer = null;
 
 // Connect to the Server
 const socket = io();
@@ -162,18 +162,29 @@ socket.on("rooms-data", (data) => {
     rooms.setState({"rooms": sorted});
 });
 
+socket.on('color-assignment', (data) => {
+  currentPlayer = data.color == 'red' ? RED : YELLOW;
+})
+
 socket.on('opponent-joined', () => {
+  console.log("Owo")
   game.setState({hasOpponent:true});
 })
 
 // Event called whenever the opponent clicked on the grid
-socket.on("opponent-clicked", (squareR, squareC) => {
+socket.on("opponent-clicked", (data) => {
+  const row = data.row;
+  const col = data.col;
 
+  game.clickHandler(row, col, currentPlayer == RED ? YELLOW : RED);
 });
 
 // Event called whenever the opponent moved their mouse accross the grid
-socket.on("opponent-mouse-moved", (squareR, squareC) => {
+socket.on("opponent-mouse-moved", (data) => {
+  const row = data.row;
+  const col = data.col;
 
+  game.mouseMoveHandler(row, col, currentPlayer == RED ? YELLOW : RED);
 });
 
 /* =========================== CLASS DEFINITIONS =========================== */
@@ -358,8 +369,9 @@ class ConnectFourBoard extends React.Component {
    * @param  {number} squareR The row of the square that got clicked on
    * @param  {number} squareC The column of the square that got clicked on
    */
-  clickHandler (squareR, squareC) {
-    console.log(`Clicked: ${squareR}, ${squareC}`);
+  clickHandler (squareR, squareC, player=currentPlayer) {
+    if (this.state.finished) return;
+    if (!this.state.hasOpponent) return;
 
     // The coordinates for the bottom most square
     const c = squareC;
@@ -368,15 +380,33 @@ class ConnectFourBoard extends React.Component {
     // Ignore if the player clicked on a full column
     if (r == -1) return;
 
+    // Check if the turn is correct
+    if (!this.state.redTurn && player == RED)
+      return;
+    if (this.state.redTurn && player == YELLOW)
+      return;
+    if (player == currentPlayer)
+      socket.emit('clicked', {row: squareR, col: squareC});
+
     // Make a copy of the current grid
     const grid = this.state.grid.slice();
     // Mutate the copy of the current grid
     grid[r*this.state.cols+c] = this.state.redTurn ? RED : YELLOW;
+
+    let finished = false;
+    if (calculateWinner(grid) != null) {
+      alert('WINNER!');
+      finished = true;
+    }
+
     // Update the state to reflect the changes in state
     this.setState({
       "grid": grid,
-      "redTurn": !this.state.redTurn
+      "redTurn": !this.state.redTurn,
+      "finished": finished
     });
+    checkWin();
+
   }
 
   /**
@@ -385,9 +415,20 @@ class ConnectFourBoard extends React.Component {
    * @param  {number} squareRow The row of the square that the mouse is on
    * @param  {number} squareCol The col of the square that the mouse is on
    */
-  mouseMoveHandler (squareRow, squareCol) {
+  mouseMoveHandler (squareRow, squareCol, player=currentPlayer) {
+    if (this.state.finished) return;
+    if (!this.state.hasOpponent) return;
+
     // Ignore the event if the col has remained unchanged
     if (this.state.mouseCol == squareCol) return;
+
+    // Check if the turn is incorrect
+    if (!this.state.redTurn && player == RED)
+      return;
+    if (this.state.redTurn && player == YELLOW)
+      return;
+    if (player == currentPlayer)
+      socket.emit('mouse-move', {row: squareRow, col: squareCol});
 
     // The coordinates for the bottom most square
     const c = squareCol;
@@ -408,6 +449,7 @@ class ConnectFourBoard extends React.Component {
       "mouseCol": squareCol
     });
   }
+
 
 
   render () {

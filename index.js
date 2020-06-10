@@ -38,7 +38,7 @@ const rooms = [];
 class Room {
 
   /**
-   * constructor - description  
+   * constructor - description
    *
    * @param  {type} name description
    * @return {type}      description
@@ -59,7 +59,11 @@ class Room {
     if (this.players.length >= 2)
       return console.error("The room has enough players already");
     this.players.push(socket);
-    socket.emit("opponent-joined");
+    // If the room is now full, notify both players that they have an opponent
+    if (this.players.length != 2)
+      return;
+    this.players[0].emit("opponent-joined");
+    this.players[1].emit("opponent-joined");
   }
 
   /**
@@ -73,6 +77,24 @@ class Room {
       if (this.players[i].id == socket.id)
         return true;
     return false;
+  }
+
+  /**
+   * getOpponent - If the socket is in this room, it will return the other
+   * socket in the room if one exists, and null otherwise.
+   *
+   * @param  {type} socket description
+   * @return {type}        description
+   */
+  getOpponent (socket) {
+    if (this.players.length != 2)
+      return null;
+    // Returns the socket that is not the one provided
+    if (this.players[0] == socket)
+      return this.players[1];
+    if (this.players[1] == socket)
+      return this.players[0];
+    return null;
   }
 
   /**
@@ -123,7 +145,8 @@ io.on('connection', function(socket){
       return socket.emit("message", "Missing room name");
     const room = new Room(data.name);
     room.join(socket);
-    rooms.push(room)
+    rooms.push(room);
+    socket.emit('color-assignment', {color: 'red'});
     // Send to all sockets the updated list
     emitRoomData();
   });
@@ -139,10 +162,37 @@ io.on('connection', function(socket){
       if (rooms[i].name != data.name)
         continue;
       rooms[i].join(socket);
+      socket.emit('color-assignment', {color: 'yellow'});
       // Send to all sockets the updated list
       emitRoomData();
       break;
     }
+  });
+
+  socket.on('mouse-move', (data) => {
+    // Get the room
+    const room = getRoom(socket);
+    if (room == null)
+      return;
+    // Get the opponent
+    const opp = room.getOpponent(socket);
+    if (opp == null)
+      return;
+    // forward the data from the socket to the opponent
+    opp.emit ('opponent-mouse-moved', data);
+  });
+
+  socket.on('clicked', (data) => {
+    // Get the room
+    const room = getRoom(socket);
+    if (room == null)
+      return;
+    // Get the opponent
+    const opp = room.getOpponent(socket);
+    if (opp == null)
+      return;
+    // forward the data from the socket to the opponent
+    opp.emit ('opponent-clicked', data);
   })
 
   /**
@@ -160,10 +210,26 @@ io.on('connection', function(socket){
       // Remove the player from the room
       const roomEmpty = room.remove(socket);
       if (roomEmpty) rooms.splice(i, 1);
+      emitRoomData();
       return;
     }
   });
 });
+
+/**
+ * getRoom - Returns the first room that contains the given socket, and returns
+ * it. If no such room is found, returns null
+ *
+ * @param  {Socket} socket The socket object
+ * @return {Room}          The first room in rooms that has the socket
+ */
+function getRoom(socket) {
+  for (let i in rooms)
+    if (rooms[i].has(socket))
+      return rooms[i];
+  return null;
+}
+
 
 /**
  * emitRoomData - description
@@ -173,7 +239,6 @@ io.on('connection', function(socket){
  */
 function emitRoomData (socket) {
   const waitingRooms = rooms.filter((room) => room.players.length < 2);
-  console.log(waitingRooms);
   if (!socket)
     return io.emit("rooms-data", waitingRooms.map((room) => room.toObject()));
   // Filters out all full rooms before sending the data to everyone
