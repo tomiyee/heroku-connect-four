@@ -92,6 +92,50 @@
   height: 100%;
 }
 
+/* ===> Single Squares */
+
+.tile {
+  margin:0;
+  padding:0;
+  width:64px;
+  height:64px;
+  display: block;
+  position: relative;
+  overflow: hidden;
+}
+
+.tile img {
+  position: absolute;
+}
+
+.tile .empty-square {
+  top:0px;
+  left:0px;
+}
+
+.tile .red-square {
+  left: -128px;
+  top:0px;
+}
+
+.tile .temp-red-square {
+  left: -128px;
+  top:-192px;
+}
+
+.tile .yellow-square {
+  left: -64px;
+  top:0px;
+}
+
+.tile .temp-yellow-square {
+  left: -64px;
+  top:-192px;
+}
+
+
+
+
 /* Alternating the colors of the rows of the room display */
 .rooms-list tr:nth-child(odd) {
   background: var(--color-4);

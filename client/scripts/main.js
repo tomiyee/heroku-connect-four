@@ -5,10 +5,11 @@ const YELLOW  = "yellow";
 const TEMP_R  = "temp-red";
 const TEMP_Y  = "temp-yellow";
 
-const SLOT_WIDTH = 50;
+const SLOT_WIDTH = 64;
 // Game Variables
 let currentTurn = RED;
 let currentPlayer = null;
+const spritesheet = new Image();
 
 // Connect to the Server
 const socket = io();
@@ -28,7 +29,8 @@ function start () {
   // Renders the React Objects
   rooms = ReactDOM.render(<Rooms />, document.getElementById('room-root'));
   game = ReactDOM.render( <ConnectFourBoard />, document.getElementById('root'));
-  $('#root').hide();
+  spritesheet.src='/client/connect-four-spritesheet.png';
+  // $('#root').hide();
 }
 
 /**
@@ -278,21 +280,23 @@ class ConnectFourSquare extends React.Component {
   }
 
   render = () => {
-    const dimensions = {
-      width: SLOT_WIDTH*3/4+'px',
-      height: SLOT_WIDTH*3/4+'px'
-    }
-    const classes = ["connect-four-square"];
-    if (this.props.value != null) {
-      classes.push(this.props.value);
-    }
 
-    const innerCircle = (
-      <span
-        className={classes.join(' ')}
-        style={dimensions}
-      >
-      </span>);
+    let tileClass;
+    if (this.props.value == RED)
+      tileClass = 'red-square';
+    if (this.props.value == TEMP_R)
+      tileClass = 'temp-red-square';
+    if (this.props.value == YELLOW)
+      tileClass = 'yellow-square';
+    if (this.props.value == TEMP_Y)
+      tileClass = 'temp-yellow-square';
+    if (this.props.value == null)
+      tileClass = 'empty-square';
+
+    const spritesheetSrc = '/client/connect-four-spritesheet.png';
+    const sprite = <img className={'sprite ' + tileClass} src={spritesheetSrc}/>;
+    const tile = <div className={'tile'}> {sprite} </div>;
+
     return (
       <td
         align={"center"}
@@ -301,7 +305,7 @@ class ConnectFourSquare extends React.Component {
         onClick={this.props.onClick}
         onMouseMove={this.props.onMouseMove}
       >
-        {innerCircle}
+        {tile}
       </td>);
   }
 }
