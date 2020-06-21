@@ -202,17 +202,22 @@ io.on('connection', function(socket){
    * @return {type}                description
    */
   socket.on('disconnect', () => {
-    for (let i in rooms) {
+    // Loop thru all rooms, if this player is in that room, remove the room
+    for (let i = rooms.length-1; i >= 0; i--) {
       let room = rooms[i];
       // Skip the room if this socket isn't inside
       if (!room.has(socket))
         continue;
+      // Notify the opponent that this player has disconnected
+      const opponent = room.getOpponent(socket);
+      if (opponent)
+        opponent.emit('opponent-disconnected');
       // Remove the player from the room
       const roomEmpty = room.remove(socket);
       if (roomEmpty) rooms.splice(i, 1);
-      emitRoomData();
-      return;
     }
+
+    emitRoomData();
   });
 });
 
