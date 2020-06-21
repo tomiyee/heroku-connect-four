@@ -30,7 +30,7 @@ function start () {
   rooms = ReactDOM.render(<Rooms />, document.getElementById('room-root'));
   game = ReactDOM.render( <ConnectFourBoard />, document.getElementById('root'));
   spritesheet.src='/client/connect-four-spritesheet.png';
-  // $('#root').hide();
+  showOnly('rooms');
 }
 
 /**
@@ -129,11 +129,9 @@ function createRoom () {
   const roomName = $('.create-room-input').val();
   if (roomName.length == 0) return;
   $('.create-room-input').val('');
-
   // If the name isn't empty, send a create room request
   socket.emit('create-room', {'name': roomName});
-  $('#room-root').hide();
-  $('#root').show();
+  showOnly('game');
 }
 
 /**
@@ -144,11 +142,57 @@ function createRoom () {
  */
 function joinRoom (roomName) {
   socket.emit('join-room', {'name': roomName});
-  $('#room-root').hide();
-  $('#root').show();
+  // Initialize a new instance
+  showOnly('game');
   game.setState({hasOpponent:true});
-
 }
+
+/**
+ * showOnly - Given the state (either 'room' or 'game'), it reveals that
+ * component.
+ *
+ * @param  {'room'|'game'} state The element we want to show
+ */
+function showOnly (state) {
+  switch (state) {
+    case 'rooms':
+      $('.room-selecters').show();
+      $('.game-container').hide();
+      break;
+
+    case 'game':
+      $('.room-selecters').hide();
+      $('.game-container').show();
+      break;
+
+    default:
+      console.log(`Unkown state: ${state}`);
+      break;
+  }
+}
+
+function updateGameDataUI (game) {
+  // By default, everything is hidden
+  $('.yellow-player').hide();
+  $('.red-player').hide();
+  $('.no-turn').hide();
+  $('.red-turn').hide();
+  $('.yellow-turn').hide();
+
+  // Update the "Current Player"
+  if (currentPlayer == RED)
+    $('.red-player').show();
+  else
+    $('.yellow-player').show();
+
+  // Update the "Current Turn"
+  if (!game.state.hasOpponent)
+    return $('.no-turn').show();
+  if (game.state.redTurn)
+    return $('.red-turn').show();
+  else $('.yellow-turn').show();
+}
+
 
 /* ========================= SERVER EVENT HANDLERS ========================= */
 
@@ -165,11 +209,10 @@ socket.on("rooms-data", (data) => {
 });
 
 socket.on('color-assignment', (data) => {
-  currentPlayer = data.color == 'red' ? RED : YELLOW;
+  currentPlayer = data.color == RED ? RED : YELLOW;
 })
 
 socket.on('opponent-joined', () => {
-  console.log("Owo")
   game.setState({hasOpponent:true});
 })
 
@@ -187,6 +230,23 @@ socket.on("opponent-mouse-moved", (data) => {
   const col = data.col;
 
   game.mouseMoveHandler(row, col, currentPlayer == RED ? YELLOW : RED);
+});
+
+// Event called whenever the opponent disconnected from the room
+socket.on('opponent-disconnected', (data) => {
+  // Reset the game state
+  const r = game.state.rows;
+  const c = game.state.cols;
+  game.setState({
+    hasOpponent: false,
+    grid: new Array(r*c).fill(EMPTY),
+    redTurn: true,
+    mouseCol: -1,
+  });
+  // Becomes the host
+  currentPlayer = RED;
+
+  showOnly('game');
 });
 
 /* =========================== CLASS DEFINITIONS =========================== */
@@ -294,7 +354,7 @@ class ConnectFourSquare extends React.Component {
       tileClass = 'empty-square';
 
     const spritesheetSrc = '/client/connect-four-spritesheet.png';
-    const sprite = <img className={'sprite ' + tileClass} src={spritesheetSrc}/>;
+    const sprite = <img className={tileClass} src={spritesheetSrc}/>;
     const tile = <div className={'tile'}> {sprite} </div>;
 
     return (
@@ -397,9 +457,9 @@ class ConnectFourBoard extends React.Component {
     // Mutate the copy of the current grid
     grid[r*this.state.cols+c] = this.state.redTurn ? RED : YELLOW;
 
-    let finished = false;
-    if (calculateWinner(grid) != null) {
-      alert('WINNER!');
+    let finished = false, winner;
+    if ((winner = calculateWinner(grid)) != null) {
+      alert(`Winner = ${winner}`);
       finished = true;
     }
 
@@ -409,8 +469,6 @@ class ConnectFourBoard extends React.Component {
       "redTurn": !this.state.redTurn,
       "finished": finished
     });
-    checkWin();
-
   }
 
   /**
@@ -478,7 +536,7 @@ class ConnectFourBoard extends React.Component {
       }
       rows.push(<tr>{row}</tr>);
     }
-
+    updateGameDataUI(this);
     // Returns the constructed React Component
     return (
       <center>

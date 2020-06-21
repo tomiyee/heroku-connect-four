@@ -18,10 +18,38 @@
     <script type="text/babel" src="/client/scripts/main.js" charset="utf-8"></script>
   </head>
   <body>
-
-    <div id="room-root"></div>
+    <div class="room-selecters">
+      <div id="room-root"></div>
+    </div>
 
     <!-- Container for the Connect Four -->
-    <div id="root"></div>
+    <div class="game-container">
+      <div id="root"></div>
+      <center>
+        <!-- UI Displaying the game data -->
+        <div class="game-data-contianer">
+          <div class="current-player">
+            You are:
+            <span class='tile red-player'>
+              <img src='/client/connect-four-spritesheet.png'/>
+            </span>
+            <span class='tile yellow-player'>
+              <img src='/client/connect-four-spritesheet.png'/>
+            </span>
+          </div>
+          <hr/>
+          <div class="current-turn">
+            Current Turn:
+            <div class='tile red-turn'>
+              <img src='/client/connect-four-spritesheet.png'/>
+            </div>
+            <div class='tile yellow-turn'>
+              <img src='/client/connect-four-spritesheet.png'/>
+            </div>
+            <div class='no-turn'> No Player Connected... </div>
+          </div>
+        </div>
+      </center>
+    </div>
   </body>
 </html>

@@ -7,6 +7,8 @@
   --color-5: #507DBC;
 }
 
+/* ======================== The Actual Game Elements ======================== */
+
 .connect-four-square {
   display: block;
   border-radius: 50%;
@@ -35,61 +37,6 @@
 
 .top-row td{
   background:white;
-}
-
-.red {
-  background:red;
-}
-
-.yellow {
-  background:yellow;
-}
-
-.temp-red {
-  background:pink;
-}
-
-.temp-yellow {
-  background:orange;
-}
-
-/* ========================== Room Data Containers ========================== */
-
-/* Define the room container */
-.rooms-container {
-  width: 600px;
-  height: 400px;
-  background: var(--color-5);
-  position: relative;
-}
-
-.rooms-list tr :nth-child(odd) {
-  width: 500px;
-}
-
-.rooms-list tr :nth-child(even) {
-  width: 100px;
-  text-align: center;
-}
-
-.create-room {
-  position:relative;
-  font-size:20px;
-}
-.create-room-input {
-  font-size: inherit;
-  width:420px
-}
-.create-room-button {
-  position: relative;
-  right:0;
-  font-size: inherit;
-  width:170px;
-}
-
-.rooms-list-container {
-  overflow-y: scroll;
-  height: 100%;
 }
 
 /* ===> Single Squares */
@@ -133,8 +80,76 @@
   top:-192px;
 }
 
+/* ========================== Game Data UI ========================== */
+
+.game-data-contianer {
+  width:300px;
+  height:200px;
+  border:2px solid black;
+  margin-top:20px;
+  padding:5px;
+  border-radius: 5px;
+}
+
+.yellow-player img {
+  top:-128px;
+  left:-64px;
+}
+
+.red-player img {
+  top:-128px;
+  left:-128px;
+}
+
+.yellow-turn img {
+  top:-128px;
+  left:-64px;
+}
+
+.red-turn img {
+  top:-128px;
+  left:-128px;
+}
 
 
+/* ========================== Room Data Containers ========================== */
+
+/* Define the room container */
+.rooms-container {
+  width: 600px;
+  height: 400px;
+  background: var(--color-5);
+  position: relative;
+}
+
+.rooms-list tr :nth-child(odd) {
+  width: 500px;
+}
+
+.rooms-list tr :nth-child(even) {
+  width: 100px;
+  text-align: center;
+}
+
+.create-room {
+  position:relative;
+  font-size:20px;
+}
+.create-room-input {
+  font-size: inherit;
+  width:420px
+}
+.create-room-button {
+  position: relative;
+  right:0;
+  font-size: inherit;
+  width:170px;
+}
+
+.rooms-list-container {
+  overflow-y: scroll;
+  height: 100%;
+}
 
 /* Alternating the colors of the rows of the room display */
 .rooms-list tr:nth-child(odd) {
